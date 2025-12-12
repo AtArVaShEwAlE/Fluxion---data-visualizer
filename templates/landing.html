@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Fluxion - Transform Your Data Into Beautiful Visualizations{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>Transform Your Data Into Beautiful Visualizations</h1>
+        <p>Upload your datasets, create stunning charts, and gain insights from your data in minutes. No coding required, just pure visual storytelling.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('signup') }}" class="hero-btn hero-btn-primary">Get Started Free</a>
+            <a href="#features" class="hero-btn hero-btn-secondary">Learn More</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section - One per row -->
+<section id="features" class="features-section">
+    <div class="feature-card">
+        <div class="feature-content">
+            <span><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-up-icon lucide-file-up"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg></span>
+            <h3>Easy Upload</h3>
+            <p>Simply drag and drop your CSV or Excel files. We handle the parsing and data cleaning automatically.</p>
+        </div>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-content">
+            <span><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette-icon lucide-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+            <h3>Beautiful Charts</h3>
+            <p>Create stunning bar charts, line graphs, pie charts, and scatter plots with just a few clicks.</p>
+        </div>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-content">
+            <span ><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-floppy-disk-icon lucide-floppy-disk"><path d="M7 3v5h8"/><path d="M5 21a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/></svg></span>
+            <h3>Save & Export</h3>
+            <p>Save your visualizations, export them as images or PDFs, and share interactive dashboards.</p>
+        </div>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-content">
+            <span ><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-waypoints-icon lucide-waypoints"><circle cx="12" cy="4.5" r="2.5"/><path d="m10.2 6.3-3.9 3.9"/><circle cx="4.5" cy="12" r="2.5"/><path d="M7 12h10"/><circle cx="19.5" cy="12" r="2.5"/><path d="m13.8 17.7 3.9-3.9"/><circle cx="12" cy="19.5" r="2.5"/></svg></span>
+            <h3>Share Anywhere</h3>
+            <p>Generate shareable links and let anyone view your charts. No login required for viewers.</p>
+        </div>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-content">
+            <span ><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap-icon lucide-zap"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>
+            <h3>Lightning Fast</h3>
+            <p>Process your data and create charts in seconds. Optimized for speed and performance.</p>
+        </div>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-content">
+            <span><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-workflow-icon lucide-workflow"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg></span>
+            <h3>No Coding Needed</h3>
+            <p>Intuitive interface means anyone can create professional visualizations without technical expertise.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="how-it-works-content">
+        <h2>How It Works</h2>
+        <div class="steps-card">
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Upload Your Data</h3>
+                    <p>Drop your CSV or Excel file and see instant preview of your data</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Choose Chart Type</h3>
+                    <p>Select columns and pick from various chart types to visualize</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Create & Share</h3>
+                    <p>Generate beautiful charts and share with the world instantly</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-card">
+        <h2>Ready to Visualize Your Data?</h2>
+        <p>Join thousands of users who trust Fluxion for their data visualization needs</p>
+        <a href="{{ url_for('signup') }}" class="cta-btn">Start Creating Now</a>
+    </div>
+</section>
+
+<script>
+// Scroll animation for feature cards
+document.addEventListener('DOMContentLoaded', function() {
+    const featureCards = document.querySelectorAll('.feature-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -100px 0px'
+    });
+    
+    featureCards.forEach(card => {
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-header">
+        <h1>
+            <!-- ICON: User Icon (e.g., lucide-user or fa-user) -->
+            <svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            My Profile
+        </h1>
+        <p>Manage your account settings and view your activity</p>
+    </div>
+
+    <div class="profile-grid">
+        <!-- Profile Info Card -->
+        <div class="card profile-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    Profile Information
+                </h3>
+            </div>
+            
+            <form method="POST" class="profile-form">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control", readonly=true) }}
+                    <small class="form-help">Username cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control" + (" error" if form.email.errors else "")) }}
+                    {% if form.email.errors %}
+                        <div class="error-message">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.full_name.label(class="form-label") }}
+                    {{ form.full_name(class="form-control" + (" error" if form.full_name.errors else "")) }}
+                    {% if form.full_name.errors %}
+                        <div class="error-message">
+                            {% for error in form.full_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for('change_password') }}" class="btn btn-secondary">
+                        Change Password
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Account Stats Card -->
+        <div class="card stats-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                Account Statistics
+                </h3>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ current_user.datasets|length }}</div>
+                    <div class="stat-label">Datasets</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ current_user.charts|length }}</div>
+                    <div class="stat-label">Charts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ days_since_joined }}</div>
+                    <div class="stat-label">Days Active</div>
+                </div>
+            </div>
+
+            <div class="member-since">
+                <p><strong>Member since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+
+        <!-- Recent Activity Card -->
+        <div class="card activity-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                   Recent Activity
+                </h3>
+            </div>
+            
+            <div class="activity-list">
+                {% if recent_activity %}
+                    {% for activity in recent_activity %}
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <p class="activity-text">{{ activity.text }}</p>
+                                <span class="activity-time">{{ activity.time }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <!-- ICON: Chart Icon (e.g., lucide-line-chart or fa-chart-line) -->
+                            <svg class="icon icon-xl"></svg>
+                        </div>
+                        <p>No recent activity</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm">Upload Your First Dataset</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card actions-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <!-- ICON: Rocket/Zap Icon (e.g., lucide-rocket or fa-rocket) -->
+                    <svg class="icon icon-md"></svg>
+                    Quick Actions
+                </h3>
+            </div>
+            
+            <div class="actions-list">
+                <a href="{{ url_for('dashboard') }}" class="action-button">
+                    <div class="action-icon">
+                        <!-- ICON: Upload Icon (e.g., lucide-upload or fa-upload) -->
+                        <svg class="icon-lg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-up-icon lucide-folder-up"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>
+                    </div>
+                    <div class="action-content">
+                        <h4>Upload Dataset</h4>
+                        <p>Add new data to visualize</p>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('charts') }}" class="action-button">
+                    <div class="action-icon">
+                        <!-- ICON: Pie Chart Icon (e.g., lucide-pie-chart or fa-chart-pie) -->
+                        <svg class="icon-lg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-pie-icon lucide-chart-pie"><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/></svg>
+                    </div>
+                    <div class="action-content">
+                        <h4>View Charts</h4>
+                        <p>Browse your saved visualizations</p>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('create_chart') }}" class="action-button">
+                    <div class="action-icon">
+                        <!-- ICON: Palette Icon (e.g., lucide-palette or fa-palette) -->
+                        <svg class="icon-lg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette-icon lucide-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                    </div>
+                    <div class="action-content">
+                        <h4>Create Chart</h4>
+                        <p>Build new visualizations</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}

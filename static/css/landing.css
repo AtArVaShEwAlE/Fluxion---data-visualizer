@@ -1,0 +1,373 @@
+.icon {
+    display: inline-block;
+    vertical-align: middle;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.icon-xs {
+    width: 14px;
+    height: 14px;
+}
+
+.icon-sm {
+    width: 18px;
+    height: 18px;
+}
+
+.icon-md {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5rem;
+}
+
+.icon-lg {
+    width: 48px;
+    height: 48px;
+}
+
+.icon-xl {
+    width: 64px;
+    height: 64px;
+}
+
+.btn .icon {
+    margin-right: 0.5rem;
+}
+
+.card-title .icon {
+    vertical-align: text-bottom;
+}
+.hero-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 2rem 4rem 2rem;
+    margin-top: -32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(226, 226, 226, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-content {
+    max-width: 800px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #E2E2E2;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+    font-size: 1.3rem;
+    color: #b0b0b0;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-btn {
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.hero-btn-primary {
+    background: #E2E2E2;
+    color: #202020;
+    margin-top: 5px;
+}
+
+.hero-btn-primary:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(226, 226, 226, 0.2);
+}
+
+.hero-btn-secondary {
+    background: rgba(226, 226, 226, 0.1);
+    color: #E2E2E2;
+    border: 2px solid #E2E2E2;
+}
+
+.hero-btn-secondary:hover {
+    background: #E2E2E2;
+    color: #202020;
+}
+
+/* Features Section */
+.features-section {
+    padding: 0;
+    background: #202020;
+}
+
+.feature-card {
+    background: #2a2a2a;
+    padding: 5rem 3rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #3a3a3a;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feature-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card.visible .feature-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.feature-icon {
+    width: 200px;
+    margin-bottom: 2rem;
+    display: block;
+    filter: grayscale(20%);
+}
+
+.feature-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #E2E2E2;
+    margin-bottom: 1.5rem;
+}
+
+.feature-card p {
+    color: #b0b0b0;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Alternating backgrounds */
+.feature-card:nth-child(even) {
+    background: #1a1a1a;
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 0;
+    background: #202020;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.how-it-works-content {
+    max-width: 100%;
+    margin: 0;
+}
+
+.how-it-works h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #E2E2E2;
+    margin-bottom: 0;
+    padding: 4rem 2rem 3rem 2rem;
+}
+
+.steps-card {
+    background: #2a2a2a;
+    padding: 4rem 3rem;
+    border-radius: 0;
+}
+
+.steps-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.step {
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 80px;
+    height: 80px;
+    background: #E2E2E2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #202020;
+    margin: 0 auto 2rem;
+}
+
+.step h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #E2E2E2;
+    margin-bottom: 1rem;
+}
+
+.step p {
+    color: #b0b0b0;
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 0;
+    background: #202020;
+}
+
+.cta-card {
+    max-width: 100%;
+    margin: 0;
+    background:#202020;
+    padding: 5rem 3rem;
+    border-radius: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(226, 226, 226, 0.05) 0%, transparent 70%);
+}
+
+.cta-card h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #E2E2E2;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.cta-card p {
+    font-size: 1.2rem;
+    color: #b0b0b0;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.cta-btn {
+    padding: 1.2rem 3rem;
+    background: #E2E2E2;
+    color: #202020;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.cta-btn:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(226, 226, 226, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .feature-card {
+        padding: 3rem 2rem;
+        min-height: 300px;
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 2rem;
+    }
+    
+    .feature-card p {
+        font-size: 1.1rem;
+    }
+    
+    .steps-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+    
+    .how-it-works h2 {
+        font-size: 2rem;
+        padding: 3rem 2rem 2rem 2rem;
+    }
+    
+    .steps-card {
+        padding: 3rem 2rem;
+    }
+    
+    .cta-card {
+        padding: 4rem 2rem;
+    }
+    
+    .cta-card h2 {
+        font-size: 2rem;
+    }
+}
