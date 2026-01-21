@@ -10,12 +10,81 @@
         <p>Upload and manage your datasets</p>
     </div>
 
+        <div class="card guidelines-card">
+        <div class="guidelines-header">
+            <svg class="icon icon-md" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <h4>File Upload Guidelines</h4>
+        </div>
+        <div class="guidelines-content">
+            <div class="guideline-section">
+                <h5>✅ Requirements</h5>
+                <ul>
+                    <li><strong>File formats:</strong> CSV (.csv), Excel (.xlsx, .xls)</li>
+                    <li><strong>Max file size:</strong> 16MB</li>
+                    <li><strong>Column headers:</strong> First row must contain column names</li>
+                    <li><strong>Data rows:</strong> At least 2 rows of data required</li>
+                </ul>
+            </div>
+            
+            <div class="guideline-section">
+                <h5>⚠️ Common Issues to Avoid</h5>
+                <ul>
+                    <li><strong>Empty columns:</strong> Remove empty columns from your Excel file</li>
+                    <li><strong>Merged cells:</strong> Unmerge all cells before uploading</li>
+                    <li><strong>Special characters:</strong> Avoid special characters in column names (use letters, numbers, underscore)</li>
+                    <li><strong>Multiple sheets:</strong> Only the first sheet will be processed</li>
+                    <li><strong>Formulas:</strong> Excel formulas will be converted to their calculated values</li>
+                </ul>
+            </div>
+
+            <div class="guideline-section">
+                <h5>💡 Best Practices</h5>
+                <ul>
+                    <li>Use clear, descriptive column names (e.g., "Sales Amount" instead of "SA")</li>
+                    <li>Keep numeric data as numbers (no currency symbols or commas)</li>
+                    <li>Use consistent date formats (YYYY-MM-DD recommended)</li>
+                    <li>Remove any summary rows or totals at the bottom</li>
+                    <li>Ensure data starts from row 1 (no title rows above headers)</li>
+                </ul>
+            </div>
+
+            <div class="guideline-example">
+                <h5>📋 Example of Good Data Structure</h5>
+                <div class="example-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product_Name</th>
+                                <th>Sales_Amount</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Widget A</td>
+                                <td>1500</td>
+                                <td>2024-01-15</td>
+                                <td>Electronics</td>
+                            </tr>
+                            <tr>
+                                <td>Widget B</td>
+                                <td>2300</td>
+                                <td>2024-01-16</td>
+                                <td>Electronics</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Compact Upload Section -->
     <div class="card upload-card-compact">
         <div class="upload-area-compact" id="uploadArea">
             <div class="upload-content-compact">
                 <div class="upload-icon-compact">
-                    <!-- ICON: Upload/Folder Icon (e.g., lucide-upload or fa-folder-open) -->
                     <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
                 </div>
                 <h4>Upload Dataset</h4>
@@ -38,10 +107,10 @@
         <!-- Error State -->
         <div class="error-state" id="errorState" style="display: none;">
             <div class="error-icon">
-                <!-- ICON: Alert/Warning Icon (e.g., lucide-alert-triangle or fa-exclamation-triangle) -->
                 <svg class="icon icon-lg" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
             </div>
             <p id="errorMessage"></p>
+            <button class="btn btn-secondary btn-sm" onclick="resetUpload()">Try Again</button>
         </div>
     </div>
 
@@ -49,13 +118,11 @@
     <div class="card data-preview-card" id="dataPreview" style="display: none;">
         <div class="card-header">
             <h3 class="card-title" id="datasetTitle">
-                <!-- ICON: File Icon (e.g., lucide-file-text or fa-file-alt) -->
                 <svg class="icon icon-md" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-chart-column-icon lucide-file-chart-column"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 18v-1"/><path d="M12 18v-6"/><path d="M16 18v-3"/></svg>
                 Dataset Preview
             </h3>
             <div class="dataset-actions">
                 <button class="btn btn-primary" id="createChartBtn">
-                    <!-- ICON: Chart Icon (e.g., lucide-bar-chart-2 or fa-chart-bar) -->
                     <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-big-icon lucide-chart-column-big"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="15" y="5" width="4" height="12" rx="1"/><rect x="7" y="8" width="4" height="9" rx="1"/></svg>
                     Create Chart
                 </button>
@@ -98,7 +165,6 @@
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">
-                <!-- ICON: Database/Library Icon (e.g., lucide-database or fa-database) -->
                 <svg class="icon icon-md" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-text-icon lucide-book-text"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/></svg>
                 Recent Datasets
             </h3>
@@ -128,7 +194,6 @@
                                        class="btn-icon" 
                                        title="Download"
                                        download>
-                                        <!-- ICON: Download Icon (e.g., lucide-download or fa-download) -->
                                         <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
                                     </a>
                                 </td>
@@ -140,7 +205,6 @@
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon">
-                    <!-- ICON: Chart/Analytics Icon (e.g., lucide-line-chart or fa-chart-area) -->
                     <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2857142857142858" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-network-icon lucide-chart-network"><path d="m13.11 7.664 1.78 2.672"/><path d="m14.162 12.788-3.324 1.424"/><path d="m20 4-6.06 1.515"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="15" r="2"/></svg>
                 </div>
                 <h4>No datasets yet</h4>

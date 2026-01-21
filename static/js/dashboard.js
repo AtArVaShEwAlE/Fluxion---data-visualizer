@@ -42,6 +42,18 @@ function handleDragOver(e) {
     uploadArea.classList.add('drag-over');
 }
 
+function resetUpload() {
+    const uploadArea = document.getElementById('uploadArea');
+    const errorState = document.getElementById('errorState');
+    const dataPreview = document.getElementById('dataPreview');
+    const fileInput = document.getElementById('fileInput');
+    
+    if (uploadArea) uploadArea.style.display = 'block';
+    if (errorState) errorState.style.display = 'none';
+    if (dataPreview) dataPreview.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+}
+
 function handleDragLeave(e) {
     e.preventDefault();
     uploadArea.classList.remove('drag-over');

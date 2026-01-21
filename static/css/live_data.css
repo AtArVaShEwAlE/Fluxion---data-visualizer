@@ -1,0 +1,379 @@
+/* Live Data Visualization Styles */
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem 0;
+}
+
+.page-header h1 {
+    color: #E2E2E2;
+    margin-top: 40px;
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: #b0b0b0;
+    font-size: 1.2rem;
+}
+
+/* Live Controls Card */
+.live-controls-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    margin-bottom: 2rem;
+}
+
+.live-controls-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(226, 226, 226, 0.05);
+    border-radius: 20px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #888;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+    background: #10b981;
+}
+
+.status-dot.streaming {
+    background: #f59e0b;
+}
+
+.status-dot.paused {
+    background: #6b7280;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Control Grid */
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.control-label {
+    font-weight: 600;
+    color: #E2E2E2;
+    font-size: 0.9rem;
+}
+
+.form-select, .form-control {
+    padding: 0.75rem;
+    border: 2px solid #3a3a3a;
+    border-radius: 8px;
+    background: #1a1a1a;
+    color: #E2E2E2;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-select:focus, .form-control:focus {
+    outline: none;
+    border-color: #E2E2E2;
+}
+
+/* Live Actions */
+.live-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #3a3a3a;
+    flex-wrap: wrap;
+}
+
+.live-actions .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Live Chart Card */
+.live-chart-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    margin-bottom: 2rem;
+}
+
+.live-chart-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.chart-stats {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.9rem;
+    color: #b0b0b0;
+}
+
+.chart-stats strong {
+    color: #E2E2E2;
+    margin-left: 0.25rem;
+}
+
+/* Live Chart Container */
+.live-chart-container {
+    position: relative;
+    min-height: 400px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#liveChart {
+    max-width: 100%;
+    max-height: 400px;
+    display: none;
+}
+
+#liveChart.active {
+    display: block;
+}
+
+/* Chart Placeholder */
+.chart-placeholder {
+    text-align: center;
+    color: #b0b0b0;
+}
+
+.placeholder-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.chart-placeholder h4 {
+    color: #E2E2E2;
+    margin-bottom: 0.5rem;
+}
+
+.chart-placeholder p {
+    margin: 0;
+}
+
+/* Data Flow Card */
+.data-flow-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+}
+
+.flow-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3rem 2rem;
+    min-height: 200px;
+}
+
+.flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(226, 226, 226, 0.05);
+    border: 2px solid #3a3a3a;
+    border-radius: 12px;
+    min-width: 120px;
+    transition: all 0.3s ease;
+}
+
+.flow-node.active {
+    border-color: #6FC1A3;
+    background: rgba(111, 193, 163, 0.1);
+    box-shadow: 0 0 20px rgba(111, 193, 163, 0.3);
+}
+
+.node-icon {
+    font-size: 2.5rem;
+}
+
+.node-label {
+    color: #E2E2E2;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Flow Path */
+.flow-path {
+    position: relative;
+    flex: 1;
+    height: 100px;
+    margin: 0 1rem;
+}
+
+.flow-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.flow-line {
+    stroke-dasharray: 10 5;
+    animation: flowDash 2s linear infinite;
+}
+
+.flow-line.active {
+    stroke: #6FC1A3;
+    stroke-width: 4;
+}
+
+@keyframes flowDash {
+    to { stroke-dashoffset: -15; }
+}
+
+/* Data Particles */
+.data-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.data-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #6FC1A3;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #6FC1A3;
+    animation: moveParticle 2s linear;
+}
+
+@keyframes moveParticle {
+    0% {
+        left: 0%;
+        top: 50%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        left: 100%;
+        top: 50%;
+        opacity: 0;
+    }
+}
+
+/* Pulsing Effect for Active Elements */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(111, 193, 163, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(111, 193, 163, 0.8);
+    }
+}
+
+.streaming .flow-node.active {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .control-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .flow-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .flow-path {
+        transform: rotate(90deg);
+        width: 100px;
+        margin: 1rem 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1rem 0;
+    }
+    
+    .control-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .live-actions {
+        flex-direction: column;
+    }
+    
+    .live-actions .btn {
+        width: 100%;
+    }
+    
+    .chart-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .live-chart-container {
+        min-height: 300px;
+        padding: 1rem;
+    }
+    
+    .flow-container {
+        padding: 2rem 1rem;
+    }
+}
+
+/* Loading Spinner for Streaming */
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(226, 226, 226, 0.3);
+    border-top-color: #E2E2E2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

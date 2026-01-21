@@ -63,6 +63,139 @@
     margin: 0;
 }
 
+.guidelines-card {
+    margin-bottom: 2rem;
+    border-left: 4px solid #6FC1A3;
+    background-color: #3a3a3a;
+}
+
+.guidelines-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.guidelines-header svg {
+    color: #6FC1A3;
+}
+
+.guidelines-header h4 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #E2E2E2;
+}
+
+.guidelines-content {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.guideline-section h5 {
+    color: #E2E2E2;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.guideline-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.guideline-section li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #b0b0b0;
+    line-height: 1.6;
+}
+
+.guideline-section li:before {
+    content: "•";
+    position: absolute;
+    left: 0.5rem;
+    color: #6FC1A3;
+    font-weight: bold;
+}
+
+.guideline-section strong {
+    color: #E2E2E2;
+    font-weight: 600;
+}
+
+.guideline-example {
+    background: #2a2a2a;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.guideline-example h5 {
+    color: #E2E2E2;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.example-table {
+    overflow-x: auto;
+}
+
+.example-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.example-table th,
+.example-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #3a3a3a;
+}
+
+.example-table th {
+    background: #1a1a1a;
+    color: #6FC1A3;
+    font-weight: 600;
+}
+
+.example-table td {
+    color: #b0b0b0;
+}
+
+.example-table tbody tr:hover {
+    background: rgba(111, 193, 163, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .guidelines-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .guideline-section li {
+        font-size: 0.9rem;
+    }
+    
+    .example-table {
+        font-size: 0.85rem;
+    }
+}
+
+/* Error state improvements */
+.error-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-state p {
+    margin-bottom: 1rem;
+    color: #ff6b6b;
+}
 /* Upload Card - White text and Dark Background */
 .upload-card-compact {
     margin-bottom: 2rem;
@@ -323,7 +456,7 @@
 
 /* Recent Datasets Card - Dark background with light text */
 .card {
-    background: #2a2a2a;
+    background: #202020;
     border: 1px solid #3a3a3a;
     border-radius: var(--border-radius-lg);
     padding: 1.5rem;

@@ -4,6 +4,13 @@ import pandas as pd
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import traceback
+import sys
+from flask_socketio import SocketIO, emit, join_room, leave_room
+import json
+import random
+import time
+from threading import Thread
 
 # Import our models and forms
 from models import db, User, Dataset, Chart
@@ -18,6 +25,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///fluxion.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+socketio = SocketIO(app,cors_allowed_origins="*")
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -50,7 +59,6 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
-        # BUG FIX: filer_by -> filter_by
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
@@ -73,7 +81,6 @@ def signup():
             email=form.email.data,
             full_name=form.full_name.data
         )
-        # BUG FIX: Don't reassign user variable
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -81,7 +88,6 @@ def signup():
         flash('Congratulations! Your account has been created.', 'success')
         return redirect(url_for('login'))
     
-    # BUG FIX: render_template not url_for, and remove leading slash
     return render_template('auth/signup.html', form=form)
 
 @app.route('/logout')
@@ -110,10 +116,9 @@ def profile():
 
     recent_activity = []
     if current_user.datasets:
-        # BUG FIX: dataset -> datasets
         for dataset in current_user.datasets[-3:]:
             recent_activity.append({
-                'icon': '📁',
+                'icon': '📊',
                 'text': f'Uploaded dataset "{dataset.original_filename}"',
                 'time': dataset.upload_date.strftime('%B %d, %Y'),
             })
@@ -124,7 +129,7 @@ def profile():
                            recent_activity=recent_activity)
 
 @app.route("/change-password", methods=['GET','POST'])
-@login_required  # BUG FIX: Add @login_required decorator
+@login_required
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
@@ -142,17 +147,15 @@ def change_password():
 @login_required
 def dashboard():
     """Dashboard - file upload and data management"""
-    # Get user's recent datasets
     recent_datasets = Dataset.query.filter_by(user_id=current_user.id)\
                                    .order_by(Dataset.upload_date.desc())\
                                    .limit(5)\
                                    .all()
     
-    # Format recent activity
     recent_activity = []
     for dataset in recent_datasets:
         recent_activity.append({
-            'icon': '📁',
+            'icon': '📊',
             'text': f'Uploaded "{dataset.original_filename}"',
             'time': dataset.upload_date.strftime('%B %d, %Y at %I:%M %p'),
             'id': dataset.id
@@ -161,13 +164,13 @@ def dashboard():
     return render_template('dashboard.html', recent_activity=recent_activity)
 
 @app.route('/create-chart')
-@login_required  # BUG FIX: Add @login_required decorator
+@login_required
 def create_chart():
     """Chart creation interface"""
     return render_template('create_chart.html')
 
 @app.route('/charts')
-@login_required  # BUG FIX: Add @login_required decorator
+@login_required
 def charts():
     user_charts = Chart.query.filter_by(user_id=current_user.id).order_by(Chart.created_at.desc()).all()
     return render_template('charts.html', charts=user_charts)
@@ -175,69 +178,187 @@ def charts():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file selected'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    if file and allowed_file(file.filename):
+    try:
+        print("=" * 50)
+        print("UPLOAD REQUEST RECEIVED")
+        print("=" * 50)
+        
+        if 'file' not in request.files:
+            print("ERROR: No file in request")
+            return jsonify({'error': 'No file selected'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            print("ERROR: Empty filename")
+            return jsonify({'error': 'No file selected'}), 400
+        
+        print(f"File received: {file.filename}")
+        
+        if not file or not allowed_file(file.filename):
+            print(f"ERROR: Invalid file type")
+            return jsonify({'error': 'Invalid file type. Please upload CSV or Excel files.'}), 400
+        
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_filename = f"{current_user.id}_{timestamp}_{filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        
+        print(f"Saving file to: {filepath}")
+        
+        # Save the file
+        file.save(filepath)
+        print(f"File saved successfully. Size: {os.path.getsize(filepath)} bytes")
+        
+        # Read the file based on extension
+        file_ext = filename.rsplit('.', 1)[1].lower()
+        print(f"File extension: {file_ext}")
+        
         try:
-            filename = secure_filename(file.filename)
-            # Add user ID and timestamp to make filename unique
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            unique_filename = f"{current_user.id}_{timestamp}_{filename}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-            file.save(filepath)
+            if file_ext == 'csv':
+                print("Reading as CSV...")
+                # Try different encodings for CSV
+                try:
+                    df = pd.read_csv(filepath, encoding='utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        df = pd.read_csv(filepath, encoding='latin-1')
+                    except UnicodeDecodeError:
+                        df = pd.read_csv(filepath, encoding='iso-8859-1')
+            elif file_ext in ['xlsx', 'xls']:
+                print(f"Reading as Excel ({file_ext})...")
+                # Read Excel file with specific parameters
+                engine = 'openpyxl' if file_ext == 'xlsx' else None
+                
+                # Try reading with different sheet options
+                try:
+                    df = pd.read_excel(filepath, engine=engine, sheet_name=0)
+                    print(f"Excel file read successfully")
+                    print(f"Shape: {df.shape}")
+                    print(f"Columns: {df.columns.tolist()}")
+                except Exception as excel_error:
+                    print(f"Error reading Excel with engine {engine}: {str(excel_error)}")
+                    # Try without specifying engine
+                    df = pd.read_excel(filepath, sheet_name=0)
+            else:
+                print(f"ERROR: Unsupported file format: {file_ext}")
+                return jsonify({'error': 'Unsupported file format'}), 400
             
-            # Read the file based on extension
-            if filename.endswith('.csv'):
-                df = pd.read_csv(filepath)
-            else:  # Excel files
-                df = pd.read_excel(filepath)
-            
-            # Clean the data - replace NaN values with empty strings
-            df_clean = df.fillna('')
-            
-            # Create dataset record in database
-            dataset = Dataset(
-                filename=unique_filename,
-                original_filename=filename,
-                file_size=os.path.getsize(filepath),
-                rows=len(df),
-                columns=len(df.columns),
-                user_id=current_user.id
-            )
-            dataset.set_column_names(df.columns.tolist())
-            dataset.set_data_types(df.dtypes.astype(str).to_dict())
-            dataset.set_preview_data(df_clean.head(10).to_dict('records'))
-            
-            db.session.add(dataset)
-            db.session.commit()
-            
-            # Return the dataset info
-            data_info = dataset.to_dict()
-            
-            return jsonify({
-                'success': True,
-                'data': data_info
-            })
-            
-        except Exception as e:
-            return jsonify({'error': f'Error processing file: {str(e)}'}), 500
-    
-    return jsonify({'error': 'Invalid file type. Please upload CSV or Excel files.'}), 400
+            print(f"DataFrame loaded. Shape: {df.shape}")
+            print(f"Columns ({len(df.columns)}): {df.columns.tolist()}")
+            print(f"First few rows:\n{df.head()}")
+        
+        except Exception as read_error:
+            # Clean up the file if reading failed
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            print(f"ERROR reading file:")
+            print(traceback.format_exc())
+            return jsonify({'error': f'Error reading file: {str(read_error)}'}), 400
+        
+        # Check if dataframe is empty
+        if df.empty:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            print("ERROR: DataFrame is empty")
+            return jsonify({'error': 'The uploaded file is empty'}), 400
+        
+        # Clean the data - replace NaN values with empty strings
+        print("Cleaning data...")
+        df_clean = df.fillna('')
+        
+        # Convert column names to strings and strip whitespace
+        print("Processing column names...")
+        df.columns = df.columns.astype(str).str.strip()
+        df_clean.columns = df_clean.columns.astype(str).str.strip()
+        
+        # Remove any unnamed columns
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        df_clean = df_clean.loc[:, ~df_clean.columns.str.contains('^Unnamed')]
+        
+        print(f"Final columns: {df.columns.tolist()}")
+        
+        # Create dataset record in database
+        print("Creating database record...")
+        dataset = Dataset(
+            filename=unique_filename,
+            original_filename=filename,
+            file_size=os.path.getsize(filepath),
+            rows=len(df),
+            columns=len(df.columns),
+            user_id=current_user.id
+        )
+        
+        # Convert data types to strings safely
+        print("Setting column names and data types...")
+        dataset.set_column_names(df.columns.tolist())
+        
+        # Convert dtypes to dict safely
+        dtypes_dict = {}
+        for col in df.columns:
+            try:
+                dtypes_dict[col] = str(df[col].dtype)
+            except Exception as dtype_error:
+                print(f"Warning: Could not get dtype for column {col}: {str(dtype_error)}")
+                dtypes_dict[col] = 'object'
+        
+        dataset.set_data_types(dtypes_dict)
+        
+        # Get preview data (first 10 rows)
+        print("Setting preview data...")
+        preview_data = df_clean.head(10).to_dict('records')
+        
+        # Clean preview data - convert any problematic values
+        cleaned_preview = []
+        for row in preview_data:
+            cleaned_row = {}
+            for key, value in row.items():
+                try:
+                    # Convert to string if it's not a standard type
+                    if pd.isna(value) or value == '':
+                        cleaned_row[key] = ''
+                    elif isinstance(value, (int, float, str, bool)):
+                        cleaned_row[key] = value
+                    else:
+                        cleaned_row[key] = str(value)
+                except Exception as val_error:
+                    print(f"Warning: Could not process value for {key}: {str(val_error)}")
+                    cleaned_row[key] = ''
+            cleaned_preview.append(cleaned_row)
+        
+        dataset.set_preview_data(cleaned_preview)
+        
+        print("Saving to database...")
+        db.session.add(dataset)
+        db.session.commit()
+        
+        # Return the dataset info
+        data_info = dataset.to_dict()
+        
+        print("SUCCESS! Dataset uploaded and saved")
+        print(f"Dataset ID: {dataset.id}")
+        print("=" * 50)
+        
+        return jsonify({
+            'success': True,
+            'data': data_info
+        })
+        
+    except Exception as e:
+        print("=" * 50)
+        print("FATAL ERROR in upload_file:")
+        print(str(e))
+        print(traceback.format_exc())
+        print("=" * 50)
+        return jsonify({'error': f'Error processing file: {str(e)}'}), 500
 
 @app.route('/save-chart', methods=['POST'])
 @login_required
 def save_chart():
     try:
-        # BUG FIX: request.json() -> request.get_json()
         data = request.get_json()
 
         chart = Chart(
-            title=data.get('title', 'Untitled Chart'),  # BUG FIX: Capital U
+            title=data.get('title', 'Untitled Chart'),
             chart_type=data.get('chart_type', 'bar'),
             user_id=current_user.id,
             dataset_id=data.get('dataset_id')
@@ -262,6 +383,8 @@ def save_chart():
         })
         
     except Exception as e:
+        print(f"Error saving chart: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({'error': f'Error saving chart: {str(e)}'}), 500
 
 @app.route('/delete-chart/<int:chart_id>', methods=['DELETE'])
@@ -271,7 +394,6 @@ def delete_chart(chart_id):
     try:
         chart = Chart.query.get_or_404(chart_id)
         
-        # Check if chart belongs to current user
         if chart.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
@@ -284,6 +406,7 @@ def delete_chart(chart_id):
         })
         
     except Exception as e:
+        print(f"Error deleting chart: {str(e)}")
         return jsonify({'error': f'Error deleting chart: {str(e)}'}), 500
 
 @app.route('/get-chart/<int:chart_id>', methods=['GET'])
@@ -293,11 +416,9 @@ def get_chart(chart_id):
     try:
         chart = Chart.query.get_or_404(chart_id)
         
-        # Check if chart belongs to current user
         if chart.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        # Get chart with dataset info
         chart_data = chart.to_dict()
         
         return jsonify({
@@ -306,6 +427,7 @@ def get_chart(chart_id):
         })
         
     except Exception as e:
+        print(f"Error loading chart: {str(e)}")
         return jsonify({'error': f'Error loading chart: {str(e)}'}), 500
 
 @app.route('/download-dataset/<int:dataset_id>')
@@ -315,18 +437,14 @@ def download_dataset(dataset_id):
     try:
         dataset = Dataset.query.get_or_404(dataset_id)
         
-        # Check if dataset belongs to current user
         if dataset.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        # Get the file path
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], dataset.filename)
         
-        # Check if file exists
         if not os.path.exists(filepath):
             return jsonify({'error': 'File not found'}), 404
         
-        # Send file
         from flask import send_file
         return send_file(
             filepath,
@@ -336,6 +454,7 @@ def download_dataset(dataset_id):
         )
         
     except Exception as e:
+        print(f"Error downloading file: {str(e)}")
         return jsonify({'error': f'Error downloading file: {str(e)}'}), 500
 
 @app.route('/export-chart-pdf/<int:chart_id>')
@@ -345,12 +464,9 @@ def export_chart_pdf(chart_id):
     try:
         chart = Chart.query.get_or_404(chart_id)
         
-        # Check if chart belongs to current user
         if chart.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        # This will be implemented with canvas-to-pdf conversion
-        # For now, return a placeholder
         return jsonify({
             'success': False,
             'message': 'PDF export will be implemented via client-side conversion'
@@ -359,8 +475,6 @@ def export_chart_pdf(chart_id):
     except Exception as e:
         return jsonify({'error': f'Error exporting PDF: {str(e)}'}), 500
 
-# Add these routes BEFORE the "if __name__ == '__main__':" line in app.py
-
 @app.route('/share-chart/<int:chart_id>', methods=['POST'])
 @login_required
 def share_chart(chart_id):
@@ -368,19 +482,15 @@ def share_chart(chart_id):
     try:
         chart = Chart.query.get_or_404(chart_id)
         
-        # Check if chart belongs to current user
         if chart.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        # Generate share token if not exists
         if not chart.share_token:
             chart.generate_share_token()
         
-        # Make chart public
         chart.is_public = True
         db.session.commit()
         
-        # Generate shareable URL
         share_url = request.host_url + 'shared/' + chart.share_token
         
         return jsonify({
@@ -399,11 +509,9 @@ def unshare_chart(chart_id):
     try:
         chart = Chart.query.get_or_404(chart_id)
         
-        # Check if chart belongs to current user
         if chart.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        # Make chart private
         chart.is_public = False
         db.session.commit()
         
@@ -421,14 +529,96 @@ def view_shared_chart(share_token):
     try:
         chart = Chart.query.filter_by(share_token=share_token, is_public=True).first_or_404()
         
-        # Render shared chart page
         return render_template('shared_chart.html', chart=chart.to_dict())
         
     except Exception as e:
         return render_template('error.html', 
                              error='Chart not found or no longer shared',
                              message='This chart may have been made private or deleted.')
+
+@app.route('/live-data')
+@login_required
+def live_data():
+
+    datasets = Dataset.query.filter_by(user_id=current_user.id)\
+                           .order_by(Dataset.upload_date.desc())\
+                           .all()
+    return render_template("live_data.html",datasets=datasets)
+
+@socketio.on('connect')
+def handle_connect():
+    print(f'client connected: {request.sid}')
+    emit('connection_response',{'status':'connected'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f'Client disconnected: {request.sid}')
+
+@socketio.on('join_live_session')
+def handle_join_session(data):
+    session_id = data.get('session_id')
+    join_room(session_id)
+    emit('joined_session', {'session_id': session_id})
+
+@socketio.on('leave_live_session')
+def handle_leave_session(data):
+    session_id = data.get('session_id')
+    leave_room(session_id)
+    emit('left_session', {'session_id': session_id})
+
+@socketio.on("start_simulation")
+def handle_start_simulation(data):
+    session_id = data.get('session_id')
+    chart_type = data.get('chart_type','line')
+    interval = data.get('interval',1000)
+
+    thread = Thread(target=simulate_live_data,args=(session_id,chart_type,interval))
+    thread.daemon = True
+    thread.start()
+    emit('simulation_started',{'session_id':session_id})
+
+def simulate_live_data(session_id,chart_type,interval):
+    start_time = time.time()
+    data_points = []
+
+    while time.time() - start_time < 120:
+        timestamp = time.strftime('%H:%M:%S')
+        value = random.randint(10,100)
+
+        data_point = {
+            'timestamp' : timestamp,
+            'value' : value,
+            'label': f'point {len(data_points) + 1}'
+        }
+
+        data_points.append(data_point)
+
+        socketio.emit('new_data_point',
+                      {'data': data_point,'session_id':session_id},
+                      room = session_id)
+        
+        time.sleep(interval/1000.0)
+
+@socketio.on('upload_live_dataset')
+def handle_live_dataset_upload(data):
+    dataset_id = data.get('dataset_id')
+    session_id = data.get('session_id')
+
+    try:
+        dataset = Dataset.query.get(dataset_id)
+        if dataset and data.user_id == current_user.id:
+            preview_data = dataset.get_preview_data()
+
+            emit('dataset_loaded',{
+                'session_id': session_id,
+                'dataset_id':dataset.to_dict()
+            })
+        else:
+            emit('error',{'message':'Dataset not found for unauthorised'})
+    except Exception as e:
+        emit('error',{'message':str(e)})
+        
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

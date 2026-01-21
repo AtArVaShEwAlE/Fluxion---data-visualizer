@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Live Data - Fluxion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🔴 Live Data Visualization</h1>
+        <p>Stream and visualize data in real-time</p>
+    </div>
+
+    <!-- Live Data Controls -->
+    <div class="card live-controls-card">
+        <div class="card-header">
+            <h3 class="card-title">⚙️ Live Stream Settings</h3>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+        
+        <div class="control-grid">
+            <!-- Data Source Selection -->
+            <div class="control-group">
+                <label class="control-label">Data Source</label>
+                <select id="dataSource" class="form-select">
+                    <option value="simulation">Simulated Data (Demo)</option>
+                    <option value="dataset">Upload Dataset</option>
+                    <option value="api">API Endpoint (Coming Soon)</option>
+                </select>
+            </div>
+
+            <!-- Chart Type Selection -->
+            <div class="control-group">
+                <label class="control-label">Chart Type</label>
+                <select id="liveChartType" class="form-select">
+                    <option value="line">Line Chart (Real-time)</option>
+                    <option value="bar">Animated Bar Chart</option>
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="gauge">Gauge (Latest Value)</option>
+                </select>
+            </div>
+
+            <!-- Update Interval -->
+            <div class="control-group">
+                <label class="control-label">Update Interval (ms)</label>
+                <input type="number" id="updateInterval" class="form-control" 
+                       value="1000" min="100" max="5000" step="100">
+            </div>
+
+            <!-- Max Data Points -->
+            <div class="control-group">
+                <label class="control-label">Max Data Points</label>
+                <input type="number" id="maxDataPoints" class="form-control" 
+                       value="20" min="10" max="100" step="5">
+            </div>
+
+            <!-- Animation Speed -->
+            <div class="control-group">
+                <label class="control-label">Animation Speed</label>
+                <select id="animationSpeed" class="form-select">
+                    <option value="0">Instant</option>
+                    <option value="300">Fast</option>
+                    <option value="750" selected>Normal</option>
+                    <option value="1500">Slow</option>
+                </select>
+            </div>
+
+            <!-- Color Scheme -->
+            <div class="control-group">
+                <label class="control-label">Color Scheme</label>
+                <select id="liveColorScheme" class="form-select">
+                    <option value="dynamic">Dynamic (Changes)</option>
+                    <option value="gradient">Gradient Flow</option>
+                    <option value="default">Default Green</option>
+                    <option value="blue">Blue Tones</option>
+                    <option value="rainbow">Rainbow</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="live-actions">
+            <button class="btn btn-primary" id="startStreamBtn">
+                ▶️ Start Stream
+            </button>
+            <button class="btn btn-secondary" id="pauseStreamBtn" disabled>
+                ⏸️ Pause
+            </button>
+            <button class="btn btn-danger" id="stopStreamBtn" disabled>
+                ⏹️ Stop
+            </button>
+            <button class="btn btn-secondary" id="clearDataBtn">
+                🗑️ Clear Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Chart Display -->
+    <div class="card live-chart-card">
+        <div class="card-header">
+            <h3 class="card-title">📊 Live Chart</h3>
+            <div class="chart-stats">
+                <span>Data Points: <strong id="dataPointCount">0</strong></span>
+                <span>Latest Value: <strong id="latestValue">--</strong></span>
+                <span>Avg: <strong id="avgValue">--</strong></span>
+            </div>
+        </div>
+
+        <!-- Chart Canvas -->
+        <div class="live-chart-container">
+            <canvas id="liveChart"></canvas>
+            
+            <!-- Initial State -->
+            <div class="chart-placeholder" id="chartPlaceholder">
+                <div class="placeholder-icon">📡</div>
+                <h4>Ready to Stream</h4>
+                <p>Click "Start Stream" to begin live data visualization</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Flow Animation -->
+    <div class="card data-flow-card">
+        <div class="card-header">
+            <h3 class="card-title">🌊 Data Flow Animation</h3>
+        </div>
+        
+        <div class="flow-container">
+            <div class="flow-node" id="sourceNode">
+                <div class="node-icon">📥</div>
+                <div class="node-label">Data Source</div>
+            </div>
+            
+            <div class="flow-path">
+                <svg class="flow-svg" viewBox="0 0 300 100">
+                    <defs>
+                        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#6FC1A3;stop-opacity:0" />
+                            <stop offset="50%" style="stop-color:#6FC1A3;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6FC1A3;stop-opacity:0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M 0 50 Q 75 20, 150 50 T 300 50" 
+                          stroke="url(#flowGradient)" 
+                          stroke-width="3" 
+                          fill="none"
+                          class="flow-line"/>
+                </svg>
+                <div class="data-particles" id="dataParticles"></div>
+            </div>
+            
+            <div class="flow-node" id="processNode">
+                <div class="node-icon">⚙️</div>
+                <div class="node-label">Processing</div>
+            </div>
+            
+            <div class="flow-path">
+                <svg class="flow-svg" viewBox="0 0 300 100">
+                    <path d="M 0 50 Q 75 80, 150 50 T 300 50" 
+                          stroke="url(#flowGradient)" 
+                          stroke-width="3" 
+                          fill="none"
+                          class="flow-line"/>
+                </svg>
+                <div class="data-particles" id="dataParticles2"></div>
+            </div>
+            
+            <div class="flow-node" id="chartNode">
+                <div class="node-icon">📊</div>
+                <div class="node-label">Visualization</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/live_data.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/live_data.js') }}"></script>
+{% endblock %}
