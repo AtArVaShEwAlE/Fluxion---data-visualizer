@@ -26,7 +26,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 socketio = SocketIO(app,cors_allowed_origins="*")
-
+active_streams = {}
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -539,16 +539,16 @@ def view_shared_chart(share_token):
 @app.route('/live-data')
 @login_required
 def live_data():
-
     datasets = Dataset.query.filter_by(user_id=current_user.id)\
                            .order_by(Dataset.upload_date.desc())\
                            .all()
-    return render_template("live_data.html",datasets=datasets)
+    return render_template("live_data.html", datasets=datasets)
 
+# WebSocket Events
 @socketio.on('connect')
 def handle_connect():
-    print(f'client connected: {request.sid}')
-    emit('connection_response',{'status':'connected'})
+    print(f'Client connected: {request.sid}')
+    emit('connection_response', {'status': 'connected'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -566,59 +566,277 @@ def handle_leave_session(data):
     leave_room(session_id)
     emit('left_session', {'session_id': session_id})
 
-@socketio.on("start_simulation")
+@socketio.on('start_simulation')
 def handle_start_simulation(data):
     session_id = data.get('session_id')
-    chart_type = data.get('chart_type','line')
-    interval = data.get('interval',1000)
+    chart_type = data.get('chart_type', 'line')
+    interval = data.get('interval', 1000)
 
-    thread = Thread(target=simulate_live_data,args=(session_id,chart_type,interval))
+    thread = Thread(target=simulate_live_data, args=(session_id, chart_type, interval))
     thread.daemon = True
     thread.start()
-    emit('simulation_started',{'session_id':session_id})
+    emit('simulation_started', {'session_id': session_id})
 
-def simulate_live_data(session_id,chart_type,interval):
+def simulate_live_data(session_id, chart_type, interval):
+    """Simulate live data stream in background"""
     start_time = time.time()
     data_points = []
 
-    while time.time() - start_time < 120:
+    while time.time() - start_time < 120:  # Run for 2 minutes
         timestamp = time.strftime('%H:%M:%S')
-        value = random.randint(10,100)
+        value = random.randint(10, 100)
 
         data_point = {
-            'timestamp' : timestamp,
-            'value' : value,
-            'label': f'point {len(data_points) + 1}'
+            'timestamp': timestamp,
+            'value': value,
+            'label': f'Point {len(data_points) + 1}'
         }
 
         data_points.append(data_point)
 
         socketio.emit('new_data_point',
-                      {'data': data_point,'session_id':session_id},
-                      room = session_id)
+                     {'data': data_point, 'session_id': session_id},
+                     room=session_id)
         
-        time.sleep(interval/1000.0)
-
-@socketio.on('upload_live_dataset')
-def handle_live_dataset_upload(data):
+        time.sleep(interval / 1000.0)
+    
+@socketio.on('stream_from_dataset')
+def handle_stream_from_dataset(data):
     dataset_id = data.get('dataset_id')
     session_id = data.get('session_id')
+    interval = data.get("interval",1000)
+    x_column = data.get('x_column')
+    y_column = data.get('y_column')
 
     try:
         dataset = Dataset.query.get(dataset_id)
-        if dataset and data.user_id == current_user.id:
-            preview_data = dataset.get_preview_data()
+        if not dataset or dataset.user_id != current_user.id:
+            emit('error',{'message':'Dataset not found or unauthorized'})
+            return 
+        
+        thread = Thread(target=stream_dataset_data,
+                        args=(session_id,dataset_id,interval,x_column,y_column))
+        thread.daemon = True
+        thread.start()
 
-            emit('dataset_loaded',{
-                'session_id': session_id,
-                'dataset_id':dataset.to_dict()
-            })
-        else:
-            emit('error',{'message':'Dataset not found for unauthorised'})
+        emit('dataset_stream_started',{'session_id':session_id})
+
     except Exception as e:
         emit('error',{'message':str(e)})
+
+def stream_dataset_data(session_id, dataset_id, interval, x_column, y_column):
+    """Stream dataset data row by row in background"""
+    print(f"🚀 STREAM FUNCTION CALLED!")
+    print(f"   Session: {session_id}")
+    print(f"   Dataset ID: {dataset_id}")
+    print(f"   X Column: {x_column}")
+    print(f"   Y Column: {y_column}")
+    
+    active_streams[session_id] = True
+    
+    try:
+        with app.app_context():
+            print("   Getting dataset from database...")
+            dataset = Dataset.query.get(dataset_id)
+            
+            if not dataset:
+                print("   ❌ ERROR: Dataset not found!")
+                return
+            
+            print(f"   ✅ Dataset found: {dataset.original_filename}")
+            data_rows = dataset.get_preview_data()  # ← FIXED: get_preview_data (not get_preivew_data)
+            print(f"   📊 Total rows to stream: {len(data_rows)}")
+            
+            # Stream each row
+            for index, row in enumerate(data_rows):
+                # Check if stream was stopped
+                if not active_streams.get(session_id, False):
+                    print("   ⏹️ Stream stopped by user")
+                    break
+                
+                x_value = row.get(x_column, '')
+                y_value = row.get(y_column, 0)
+                
+                print(f"   Row {index}: X={x_value}, Y={y_value}")  # DEBUG
+                
+                try:
+                    y_value = float(y_value)
+                except (ValueError, TypeError) as e:
+                    print(f"   ⚠️ Could not convert Y value: {y_value}")
+                    y_value = 0
+                
+                data_point = {
+                    'timestamp': str(x_value),
+                    'value': y_value,
+                    'label': str(x_value),
+                    'row_index': index
+                }
+                
+                print(f"   📤 Emitting: {data_point}")  # DEBUG
+                
+                socketio.emit('new_data_point',  # ← FIXED: new_data_point (not new_data_emit)
+                             {'data': data_point, 'session_id': session_id},  # ← FIXED: session_id (not sessoion_id)
+                             room=session_id)
+                
+                time.sleep(interval / 1000.0)
+            
+            print("   ✅ Stream completed!")
+                
+    except Exception as e:
+        print(f"   ❌ ERROR streaming dataset: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        socketio.emit('error',
+                     {'message': f'Error streaming dataset: {str(e)}', 'session_id': session_id},
+                     room=session_id)
+    finally:
+        # Clean up
+        active_streams.pop(session_id, None)
+        print("   🏁 Stream ended")
         
+@socketio.on('stream_from_api')
+def handle_stream_from_api(data):
+    api_url = data.get('api_url')
+    session_id = data.get('session_id')
+    interval = data.get('interval',2000)
+    value_path = data.get('value_path','value')
+    label_path = data.get('label_path','label')
+
+    try:
+        thread = Thread(target=stream_api_data,
+                        args=(session_id,api_url,interval,value_path,label_path))
+        thread.daemon = True
+        thread.start()
+    
+    except Exception as e:
+        emit('error',{'message':str(e)})
+
+def stream_api_data(session_id,api_url,interval,value_path,label_path):
+
+    import requests
+
+    start_time = time.time()
+    request_count = 0
+    max_requests = 60
+
+    while time.time() - start_time < 180 and request_count < max_requests:
+        try:
+            response = requests.get(api_url,timeout=5)
+            response.raise_for_status()
+
+            api_data = response.json()
+
+            value = extract_json_value(api_data,value_path)
+            label = extract_json_value(api_data,value_path)
+
+            timestamp = time.strftime('%H:%M:%S')
+            data_point = {
+                'timestamp': timestamp,
+                'value' : float(value) if value else random.randint(10,100),
+                'label': str(label) if label else timestamp
+            }
+
+            socketio.emit('new_data_point',
+                          {'data':data_point,'session_id':session_id},
+                          room = session_id)
+            
+            request_count += 1
+            time.sleep(interval /1000.0)
+        
+        except requests.RequestException as e:
+            print(f"API request error: {str(e)}")
+            socketio.emit('api_error',
+                          {'message':f'API error: {str(e)}','session_id':session_id},
+                          room = session_id)
+            
+            time.sleep(interval / 1000.0)
+        except Exception as e:
+            print(f"error in API streaming: {str(e)}")
+            break
+
+def extract_json_value(data,path):
+
+    if not path:
+        return None
+    
+    keys = path.split('.')
+    value = data
+
+    for key in keys:
+        if isinstance(value,dict):
+            value = value.get(key)
+        elif isinstance(value,list) and key.isdigit():
+            value = value[int(key)]
+        else:
+            return None
+    
+    return value
+
+@app.route('/get-dataset-columns/<int:dataset_id>')
+@login_required
+def get_dataset_columns(dataset_id):
+
+    try:
+        dataset = Dataset.query.get_or_404(dataset_id)
+
+        if dataset.user_id != current_user.id:
+            return jsonify({'error': 'Unauthorized'}),403
+        
+        columns = dataset.get_column_names()
+
+        return jsonify({
+            'success':True,
+            'columns' : columns,
+            'dataset_name': dataset.original_filename
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}),500
+
+@socketio.on('test_api_endpoint')
+def handle_test_api(data):
+
+    import requests
+
+    api_urls = data.get('api_url')
+
+    try:
+        response = requests.get(api_urls,timeout=5)
+        response.raise_for_status()
+        api_data = response.json()
+
+        emit('api_test_success',{
+            'message':"API endpointis working!",
+            'sample_data':api_data
+        })
+    
+    except requests.RequestException as e:
+        emit('api_test_failed',{
+            'sample_data': api_data
+        })
+    
+    except requests.RequestException as e:
+        emit('api_test_failed',{
+            'message':f'API test failed: {str(e)}'
+        })
+    
+    except Exception as e:
+        emit('api_test_failed',{
+            'message': f'API test failed: {str(e)}'
+        })
+    except Exception as e:
+        emit('api_test_failed', {
+            'message': f'Error: {str(e)}'
+        })
+
+@socketio.on('stop_stream')
+def handle_stop_stream(data):
+    """Stop any active stream"""
+    session_id = data.get('session_id')
+    emit('stream_stopped', {'session_id': session_id})
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+    # Use socketio.run instead of app.run for WebSocket support
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

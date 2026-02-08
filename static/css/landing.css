@@ -42,7 +42,7 @@
     vertical-align: text-bottom;
 }
 .hero-section {
-    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    background:#1a1a1a;
     min-height: 70vh;
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@
 .hero-content h1 {
     font-size: 3.5rem;
     font-weight: 800;
-    color: #E2E2E2;
+    color: #47D46B;
     margin-bottom: 1.5rem;
     line-height: 1.2;
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
@@ -82,7 +82,7 @@
 
 .hero-content p {
     font-size: 1.3rem;
-    color: #b0b0b0;
+    color: #fdffaa;
     margin-bottom: 2.5rem;
     line-height: 1.6;
 }
@@ -112,9 +112,7 @@
 }
 
 .hero-btn-primary:hover {
-    background: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(226, 226, 226, 0.2);
+    background: linear-gradient(#47D46B,#fdffaa);
 }
 
 .hero-btn-secondary {
@@ -124,7 +122,7 @@
 }
 
 .hero-btn-secondary:hover {
-    background: #E2E2E2;
+    background: linear-gradient(#47D46B,#fdffaa);
     color: #202020;
 }
 
@@ -231,7 +229,7 @@
 .step-number {
     width: 80px;
     height: 80px;
-    background: #E2E2E2;
+    background: linear-gradient(#47D46B,#fdffaa);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -312,9 +310,7 @@
 }
 
 .cta-btn:hover {
-    background: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(226, 226, 226, 0.2);
+    background: linear-gradient(#47D46B,#fdffaa);
 }
 
 /* Responsive Design */

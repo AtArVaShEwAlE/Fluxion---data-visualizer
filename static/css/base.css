@@ -17,7 +17,7 @@
 }
 
 body {
-    font-family: 'Bricolage Grotesque', sans-serif;
+    font-family: "DM Sans", sans-serif;
     background-color: #202020;
     color: var(--text-dark);
     line-height: 1.6;
@@ -54,18 +54,50 @@ body {
                 0 6px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Left Section: Logo */
-.navbar-logo {
+.logo-link {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.logo-link:hover {
+    transform: translateY(-2px);
+}
+
+.logo-image {
+    height: 35px;
+    width: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+}
+
+.logo-link:hover .logo-image {
+    filter: brightness(1.2);
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #E2E2E2;
+    line-height: 1;
+    margin: 0;
 }
 
 .navbar-logo h3 {
-    display: inline-block;
-    line-height: 0;
-    margin-top: 15px;
-    color: #E2E2E2;
+    display: none; /* Hide old text-only logo */
+}
+
+/* Responsive Logo */
+@media (max-width: 768px) {
+    .logo-image {
+        height: 28px;
+    }
+    
+    .logo-text {
+        font-size: 1.25rem;
+    }
 }
 
 

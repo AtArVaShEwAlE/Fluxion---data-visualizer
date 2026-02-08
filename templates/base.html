@@ -8,7 +8,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+
+
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
@@ -19,8 +21,10 @@
     <div class="navbar-container">
         <!-- Left: Logo Section -->
         <div class="navbar-logo">
-            <a href="{{ url_for('landing') }}">
-                <h3>Fluxion</h3>
+            <a href="{{ url_for('landing') }}" class="logo-link">
+                <img src="{{ url_for('static', filename='img/FLUXIONLOGO.png') }}" 
+                    alt="Fluxion Logo" 
+                    class="logo-image">
             </a>
         </div>
         
